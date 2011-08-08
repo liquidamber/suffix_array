@@ -61,8 +61,11 @@ private:
       return std::strncmp(str+a, b, limit) < 0;
     }
   };
-  rank_t get_rank(size_t idx, size_t offset=0) {
-    return ($.index[idx] + offset < ref_length) ? $.rank[$.index[idx] + offset] : 0;
+  inline rank_t get_rank(size_t idx, size_t offset=0) {
+    return $.get_rank_from_stridx($.index[idx], offset);
+  }
+  inline rank_t get_rank_from_stridx(size_t idx, size_t offset=0) {
+    return (idx + offset < ref_length) ? $.rank[idx + offset] : 0;
   }
   void dprint_index_and_rank() {
 #ifdef DEBUG_PRINT_IDXRNK
@@ -109,6 +112,31 @@ private:
     }
   }
   void mqsort(const size_t lower, const size_t upper, const size_t prefix_length) {
+    // if(upper - lower <= SORT_SIZE_LIMIT)
+    // {
+    //   std::sort($.index.begin()+lower,
+    //             $.index.begin()+upper,
+    //             [this, prefix_length](signed_length_t a, signed_length_t b) -> bool {
+    //               return $.get_rank_from_stridx(a, prefix_length)
+    //                 < $.get_rank_from_stridx(b, prefix_length);
+    //             });
+    //   for(size_t x = lower; x < upper; ++x)
+    //   {
+    //     rank_t r = get_rank(x, prefix_length);
+    //     size_t y;
+    //     for(y = x + 1; y < upper && get_rank(y, prefix_length) == r; ++y) ;
+    //     if(1 == y - x)
+    //     {
+    //       $.index[x] = -1;
+    //     }
+    //     else
+    //     {
+    //       for(size_t i = x; i != y; ++i)
+    //         $.rank[i] = y;
+    //     }
+    //   }
+    //   return;
+    // }
     size_t l = lower, r = upper - 1;
     rank_t pivot = select_middle(get_rank(l,       prefix_length),
                                  get_rank((l+r)/2, prefix_length),
@@ -198,6 +226,7 @@ private:
     }
   }
 public:
+  const static size_t SORT_SIZE_LIMIT = 10;
   SuffixArray(const char * ref_str, const size_t ref_length)
     : ref_str(ref_str), ref_length(ref_length),
       index(ref_length), rank(ref_length) {
