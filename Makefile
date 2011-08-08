@@ -1,15 +1,21 @@
-CTYPEFLAGS = -g -Wall -Wextra -lm
+CTYPEFLAGS = -g -Wall -Wextra -lm -Winline
 CFLAGS = $(CTYPEFLAGS)
 CXXFLAGS = $(CTYPEFLAGS) -std=c++0x -Dnullptr=0
 
-SRC = $(wildcard *.cpp *.c)
-MYSRC = $(wildcard *.cpp)
-TGT = \
-	$(addsuffix .O0, $(basename $(MYSRC))) \
-	$(addsuffix .O2, $(basename $(SRC))) \
-	$(addsuffix .O3, $(basename $(SRC)))
+CSRC = $(wildcard *.c)
+CPPSRC = $(wildcard *.cpp)
+TGT_SYS = $(addsuffix .O3, $(basename $(CSRC)))
+TGT_O0 = $(addsuffix .O0, $(basename $(CPPSRC)))
+TGT_O2 = $(addsuffix .O2, $(basename $(CPPSRC)))
+TGT_O3 = $(addsuffix .O3, $(basename $(CPPSRC)))
 
-all: $(TGT)
+O3: $(TGT_O3) $(TGT_SYS)
+
+O2: $(TGT_O2) $(TGT_SYS)
+
+O0: $(TGT_O0) $(TGT_SYS)
+
+all: O0 O2 O3
 
 %.O0: %.cpp
 	$(CXX) $(CXXFLAGS) -O0 $< libgen_prob.a -o $@
