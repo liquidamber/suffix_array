@@ -1,4 +1,4 @@
-CTYPEFLAGS = -g -Wall -Wextra -lm -Winline
+CTYPEFLAGS = -g -Wall -Wextra -lm -Winline -lrt
 CFLAGS = $(CTYPEFLAGS)
 CXXFLAGS = $(CTYPEFLAGS) -std=c++0x -Dnullptr=0
 
