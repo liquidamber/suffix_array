@@ -8,7 +8,13 @@ TGT = $(basename $(SRC))
 all: $(TGT)
 
 %: %.cpp
-	$(CXX) $(CXXFLAGS) $^ libgen_prob.a -o $@
+	$(CXX) $(CXXFLAGS) $< libgen_prob.a -o $@
+
+mysearch: mysearch.cpp mysearch.h gen_prob.h
+	$(CXX) $(CXXFLAGS) $< libgen_prob.a -o $@
+
+test: test.cpp mysearch.h gen_prob.h
+	$(CXX) $(CXXFLAGS) $< libgen_prob.a -o $@
 
 %: %.c
-	$(CC) $(CFLAGS) $^ libgen_prob.a -o $@
+	$(CC) $(CFLAGS) $< libgen_prob.a -o $@
