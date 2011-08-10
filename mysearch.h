@@ -18,6 +18,7 @@ extern "C"{
 
 //#define DEBUG_PRINT_IDXRNK
 //#define DEBUG_PRINT_PREFIXED_RANK
+//#define DEBUG_PRINT_HIGHT
 
 namespace
 {
@@ -42,6 +43,7 @@ private:
   const char * ref_str;
   const size_t ref_length;
   std::vector<signed_length_t> index, rank;
+  std::vector<rank_t> hgt;
   struct LessStr{
     const char * str;
     LessStr(const char * str) : str(str) {}
@@ -67,7 +69,7 @@ private:
   inline rank_t get_rank_from_stridx(size_t idx, size_t offset=0) {
     return (idx + offset < ref_length) ? $.rank[idx + offset] : 0;
   }
-  void dprint_index_and_rank() {
+  void dprint_index_and_rank() const {
 #ifdef DEBUG_PRINT_IDXRNK
     for(size_t i=0; i < $.ref_length; ++i)
     {
@@ -78,7 +80,7 @@ private:
     }
 #endif
   }
-  void dprint_rank_prefixed(size_t lower, size_t upper, size_t prefix_length) {
+  void dprint_rank_prefixed(size_t lower, size_t upper, size_t prefix_length) const {
 #ifdef DEBUG_PRINT_PREFIXED_RANK
     fprintf(stderr, "debug: prefix: %zd rank[+p]:", prefix_length);
     for(size_t x=lower; x < upper; ++x)
@@ -86,6 +88,14 @@ private:
       fprintf(stderr, " %"PRIdPTR, get_rank(x, prefix_length));
     }
     fprintf(stderr, "\n"); fflush(stderr);
+#endif
+  }
+  void dprint_hgt() const {
+#ifdef DEBUG_PRINT_HIGHT
+    for(size_t i=0; i < $.ref_length; ++i)
+    {
+      fprintf(stderr, "debug: i: %2zd hgt: %"PRIdPTR"\n", i, $.hgt[i]);
+    }
 #endif
   }
   void init_index_and_rank() {
@@ -216,14 +226,63 @@ private:
         }
         // fprintf(stderr, "debug: finish 2nd: reset rank of pivot: l: %zd r: %zd\n", l, r);
       }
-      dprint_index_and_rank();
+      // dprint_index_and_rank();
     }
     if(r < upper)
     {
       mqsort(r, upper, prefix_length);
       // fprintf(stderr, "debug: finish 3rd children call\n");
-      dprint_index_and_rank();
+      // dprint_index_and_rank();
     }
+  }
+  size_t lcp(size_t i, size_t j) const {
+    size_t k=0;
+    for(k = 0; ; ++k)
+    {
+      char a = ref_str[i + k];
+      char b = ref_str[j + k];
+      if(a != b || a == '\0' || b == '\0')
+        break;
+    }
+    return k;
+  }
+  void mk_hgt() {
+    rank_t h = 0;
+    $.hgt.resize($.ref_length);
+    for(size_t i=0; i < $.ref_length; ++i)
+    {
+      if($.rank[i] == static_cast<signed_length_t>($.ref_length))
+      {
+        $.hgt[$.rank[i]-1] = -1;
+        // fprintf(stderr,
+        //         "debug: i: %2zd rank[i]-1: %2"PRIdPTR" skip\n",
+        //         i, rank[i]-1);fflush(stderr);
+        continue;
+      }
+      size_t j = $.index[$.rank[i]];
+      if(h == 0)
+      {
+        h = $.hgt[$.rank[i]-1] = lcp(i, j);
+      }
+      else
+      {
+        h = $.hgt[$.rank[i]-1] = h-1 + lcp(i+h-1, j+h-1);
+      }
+      // fprintf(stderr,
+      //         "debug: lcp: compare i: %2zd j: %2zd h: %2"PRIdPTR"\n",
+      //         i, rank[i]-1, j, h);fflush(stderr);
+    }
+  }
+  /**
+   * Return LCP value between a & b (assume a < b)
+   */
+  size_t get_lcp_from_hgt(size_t a, size_t b) const {
+    signed_length_t lcp = $.hgt[a];
+    for(size_t i = a+1; i < b; ++i)
+    {
+      lcp = std::min(lcp, $.hgt[i]);
+    }
+    return static_cast<size_t>(lcp);
   }
 public:
   const static size_t SORT_SIZE_LIMIT = 10;
@@ -266,9 +325,11 @@ public:
       $.index[$.rank[i]-1] = i;
     }
     dprint_index_and_rank();
+    // mk_hgt();
+    // dprint_hgt();
   }
-  answer findall_or_max(const char * query, const size_t max_hits) {
-    typedef std::vector<signed_length_t>::iterator itr_t;
+  answer findall_or_max(const char * query, const size_t max_hits) const {
+    typedef std::vector<signed_length_t>::const_iterator itr_t;
     const size_t l = std::strlen(query);
     itr_t lb = std::lower_bound(index.begin(),
                                 index.end()  , query, LessStrLimited(ref_str, l));
