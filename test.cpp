@@ -6,6 +6,9 @@
 #include <boost/timer.hpp>
 #include "mysearch.h"
 
+//#define FIND_BUG_MODE
+constexpr double FIND_BUG_MODE_SIZE = 8;
+
 class MyTimer
 {
   double t1;
@@ -21,11 +24,11 @@ public:
   }
 };
 
-void test(const char * str, bool print=false)
+void test(const char * str)
 {
-  if(print) printf("#==test %s==\n", str);
+  printf("#==test %s==\n", str);
   boost::timer t;
-  SuffixArray SA(str, std::strlen(str));
+  SuffixArray SA(str, std::strlen(str) + 1);
   printf("#elapsed time: %lf\n", t.elapsed());
 }
 
@@ -49,14 +52,20 @@ void randomtest()
 
   for(size_t size=2; size < MAX_SIZE; size*=2)
   {
+#ifdef FIND_BUG_MODE
+    size = FIND_BUG_MODE_SIZE;
+#endif
     buf.resize(size);
     for(size_t i=0; i < size; ++i)
     {
-      if(i&1) buf[i] = 'a';
+      if(false && i&1) buf[i] = 'a';
       else buf[i] = rnd();
     }
     MyTimer t;
-    SuffixArray SA(buf.c_str(), size);
+#ifdef FIND_BUG_MODE
+    std::cerr << buf << "\n";
+#endif
+    SuffixArray SA(buf.c_str(), size + 1);
     result.push_back(std::make_pair(size, t.elapsed()));
   }
   for(result_itrator it = result.begin(); it != result.end(); ++it)
@@ -65,9 +74,35 @@ void randomtest()
   }
 }
 
+void findbug()
+{
+  printf("#find bug\n");
+  std::string str;
+  str.resize(6);
+  size_t i=0;
+  bool first = true;
+  while(first || i)
+  {
+    first = false;
+    size_t j, k = i;
+    j = k % 26; k = k / 26; str[0] = j + 'a';
+    j = k % 26; k = k / 26; str[1] = j + 'a';
+    j = k % 26; k = k / 26; str[2] = j + 'a';
+    j = k % 26; k = k / 26; str[3] = j + 'a';
+    j = k % 26; k = k / 26; str[4] = j + 'a';
+    j = k % 26; k = k / 26; str[5] = j + 'a';
+    printf("%s\n", str.c_str());
+    SuffixArray SA(str.c_str(), 7);
+    ++i;
+  }
+}
+
 int main()
 {
-  //test("mississippi");
-  test("ababababcabcdabcdeabcdefabababacab", true);
+  test("yakafaqafaqafana");
+  test("mississippi");
+  test("ababababcabcdabcdeabcdefabababacab");
+  //findbug();
+  printf("#random test\n");
   randomtest();
 }
