@@ -1,6 +1,7 @@
-#include "mysearch.h"
+#include "mysearch_naive.h"
 
 int main(int argc, char ** argv) {
+  using namespace liquid;
   const int problem_type         = (argc > 1 ? atoi(argv[1]) : 0);
   const int alphabet_size        = (argc > 2 ? atoi(argv[2]) : 0);
   const int reference_string_len = (argc > 3 ? atoi(argv[3]) : 0);
@@ -13,8 +14,8 @@ int main(int argc, char ** argv) {
   printf("%s: solving...\n", __FILE__);
   std::vector<answer> ans(p->n_query_strings);
   std::vector<int> I(p->max_hits_to_answer);
-  std::unique_ptr<SuffixArray> SA(new SuffixArray(p->reference_string,
-                                                  p->reference_string_len));
+  std::unique_ptr<NaiveSuffixArray> SA(new NaiveSuffixArray(p->reference_string,
+                                                            p->reference_string_len));
   for(int i=0; i < p->n_query_strings; i++)
   {
     ans[i] = SA->findall_or_max(p->query_strings[i],
