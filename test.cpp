@@ -5,6 +5,7 @@
 #include <functional>
 #include <boost/timer.hpp>
 #include "mysearch_naive.h"
+#include "mysearch_is.h"
 
 //#define FIND_BUG_MODE
 constexpr double FIND_BUG_MODE_SIZE = 8;
@@ -103,10 +104,15 @@ void findbug()
 int main()
 {
   using namespace liquid;
+  std::cout << "Naive\n";
   test<NaiveSuffixArray>("yakafaqafaqafana");
   test<NaiveSuffixArray>("mississippi");
   test<NaiveSuffixArray>("ababababcabcdabcdeabcdefabababacab");
-  //findbug<NaiveSuffixArray>();
+  std::cout << "Induced\n";
+  test<ISSuffixArray>("yakafaqafaqafana");
+  test<ISSuffixArray>("mississippi");
+  test<ISSuffixArray>("ababababcabcdabcdeabcdefabababacab");
+  //findbug<ISSuffixArray>();
   printf("#random test\n");
   randomtest<NaiveSuffixArray>();
 }

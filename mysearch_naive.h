@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio>
+#include <algorithm>
 #include "mysearch.h"
 
 namespace liquid
