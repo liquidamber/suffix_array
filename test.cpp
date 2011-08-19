@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <functional>
 #include <boost/timer.hpp>
-#include "mysearch.h"
+#include "mysearch_naive.h"
+#include "mysearch_is.h"
+#include "mysearch_ls.h"
 
 //#define FIND_BUG_MODE
 constexpr double FIND_BUG_MODE_SIZE = 8;
@@ -24,14 +26,16 @@ public:
   }
 };
 
+template <class T>
 void test(const char * str)
 {
   printf("#==test %s==\n", str);
   boost::timer t;
-  SuffixArray SA(str, std::strlen(str) + 1);
+  T SA(str, std::strlen(str) + 1);
   printf("#elapsed time: %lf\n", t.elapsed());
 }
 
+template <class T>
 void randomtest()
 {
   std::string buf;
@@ -65,7 +69,7 @@ void randomtest()
 #ifdef FIND_BUG_MODE
     std::cerr << buf << "\n";
 #endif
-    SuffixArray SA(buf.c_str(), size + 1);
+    T SA(buf.c_str(), size + 1);
     result.push_back(std::make_pair(size, t.elapsed()));
   }
   for(result_itrator it = result.begin(); it != result.end(); ++it)
@@ -74,6 +78,7 @@ void randomtest()
   }
 }
 
+template <class T>
 void findbug()
 {
   printf("#find bug\n");
@@ -92,17 +97,27 @@ void findbug()
     j = k % 26; k = k / 26; str[4] = j + 'a';
     j = k % 26; k = k / 26; str[5] = j + 'a';
     printf("%s\n", str.c_str());
-    SuffixArray SA(str.c_str(), 7);
+    T SA(str.c_str(), 7);
     ++i;
   }
 }
 
 int main()
 {
-  test("yakafaqafaqafana");
-  test("mississippi");
-  test("ababababcabcdabcdeabcdefabababacab");
-  //findbug();
+  using namespace liquid;
+  std::cout << "Naive\n";
+  test<NaiveSuffixArray>("yakafaqafaqafana");
+  test<NaiveSuffixArray>("mississippi");
+  test<NaiveSuffixArray>("ababababcabcdabcdeabcdefabababacab");
+  std::cout << "Larsson Sadakane\n";
+  test<LSSuffixArray>("yakafaqafaqafana");
+  test<LSSuffixArray>("mississippi");
+  test<LSSuffixArray>("ababababcabcdabcdeabcdefabababacab");
+  std::cout << "Induced\n";
+  test<ISSuffixArray>("yakafaqafaqafana");
+  test<ISSuffixArray>("mississippi");
+  test<ISSuffixArray>("ababababcabcdabcdeabcdefabababacab");
+  //findbug<ISSuffixArray>();
   printf("#random test\n");
-  randomtest();
+  randomtest<NaiveSuffixArray>();
 }
