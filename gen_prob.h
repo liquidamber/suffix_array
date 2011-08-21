@@ -26,6 +26,13 @@ typedef struct answer {
 				   これは何でも良い(n_hitsだけが正しければOK) */
 } answer, * answer_t;
 
+enum {
+  problem_type_practice = 0,
+  problem_type_malei = 90,
+  problem_type_real_begin = 100,
+  problem_type_real_end = 114,
+};
+
 
 /* 
  * [1] 問題を生成する関数:
