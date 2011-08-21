@@ -5,6 +5,7 @@
 #include <climits>
 #include <iostream>
 #include <functional>
+#include <boost/noncopyable.hpp>
 #include "mysearch.h"
 
 //#define DEBUG
@@ -42,20 +43,50 @@ namespace
     std::memset(&vec[0], 0, vec.size()*sizeof(vec[0]));
     // std::fill(vec.begin(), vec.end(), 0);
   }
+
+  template <class T>
+  class SimpleArray : boost::noncopyable
+  {
+    T * buffer;
+    const size_t nmemb;
+  public:
+    SimpleArray() : nmemb(0) {
+      buffer = nullptr;
+    }
+    SimpleArray(size_t nmemb) : nmemb(nmemb) {
+      buffer = static_cast<T *>(std::calloc(nmemb, sizeof(T)));
+      if(nmemb != 0 && buffer == nullptr) {
+        throw std::bad_alloc();
+      }
+    }
+    ~SimpleArray() {
+      std::free(buffer);
+    }
+    T & operator[](size_t i) {
+      return buffer[i];
+    }
+    T * begin() { return buffer; }
+    T * end() { return buffer + nmemb; }
+    size_t size() { return nmemb; }
+  };
 }
 
 namespace liquid
 {
   namespace SAIS
   {
+    typedef BaseSuffixArray::signed_length_t signed_length_t;
+    typedef BaseSuffixArray::unsigned_length_t unsigned_length_t;
+    typedef std::vector<unsigned_length_t> bucket_t;
+    // typedef SimpleArray<unsigned_length_t> bucket_t;
+
     inline bool isLMSindex(const std::vector<bool> & type, size_t i)
     {
       return i != 0 && type[i] && !type[i-1];
     }
-    typedef BaseSuffixArray::signed_length_t signed_length_t;
-    typedef BaseSuffixArray::unsigned_length_t unsigned_length_t;
+
     template <class Iterator>
-    void getBuckets(std::vector<unsigned_length_t> & bkt,
+    void getBuckets(bucket_t & bkt,
                     Iterator begin,
                     Iterator end,
                     bool is_get_end) {
@@ -71,12 +102,13 @@ namespace liquid
         *it = is_get_end ? sum : sum - *it;
       }
     }
+
     template <class Iterator>
     void induceSAl(Iterator begin,
                    Iterator end,
                    const std::vector<bool> & type,
                    std::vector<signed_length_t> & SA,
-                   std::vector<unsigned_length_t> & bkt) {
+                   bucket_t & bkt) {
       const size_t n = end - begin;
 #ifdef DEBUG
       std::cerr << "debug: ==induceSAl: begin\n";
@@ -100,12 +132,13 @@ namespace liquid
         }
       }
     }
+
     template <class Iterator>
     void induceSAs(Iterator begin,
                    Iterator end,
                    const std::vector<bool> & type,
                    std::vector<signed_length_t> & SA,
-                   std::vector<unsigned_length_t> & bkt) {
+                   bucket_t & bkt) {
       const size_t n = end - begin;
       getBuckets(bkt, begin, end, true);
       for(size_t i=n; i != 0; )
@@ -123,6 +156,7 @@ namespace liquid
         }
       }
     }
+
     template <class Iterator>
     void SA_IS(Iterator begin,
                Iterator end,
@@ -166,7 +200,7 @@ namespace liquid
 #endif
       // stage 1: reduce problem.
       {
-        std::vector<unsigned_length_t> bkt(alnum, 0);
+        bucket_t bkt(alnum);
         getBuckets(bkt, begin, end, true);
         setMinusOne(SA.begin(), SA.begin() + n);
         for(size_t i = 1; i<n; ++i)
@@ -255,7 +289,7 @@ namespace liquid
 
       // stage 3: induce the result for original
       {
-        std::vector<unsigned_length_t> bkt(alnum, 0);
+        bucket_t bkt(alnum);
         getBuckets(bkt, begin, end, true); // find ends of buckets
         for(size_t i=1, j=0; i < n; ++i)
         {
