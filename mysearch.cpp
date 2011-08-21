@@ -3,6 +3,7 @@
 #include "mysearch_naive.h"
 #include "mysearch_ls.h"
 #include "mysearch_is.h"
+#include "mysearch_isorg.h"
 
 template <class T>
 void calc_problem(int problem_type,
@@ -95,6 +96,7 @@ int main(int argc, char ** argv) {
   CHECK_TYPE(Naive)
   CHECK_TYPE(LS)
   CHECK_TYPE(IS)
+  CHECK_TYPE(ISorg)
   else{ std::cerr << "Incorrect implementation type\n"; return 1; }
   return 0;
 }
