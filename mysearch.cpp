@@ -1,9 +1,6 @@
 #include <memory>
 #include <iostream>
-#include "mysearch_naive.h"
-#include "mysearch_ls.h"
-#include "mysearch_is.h"
-#include "mysearch_isorg.h"
+#include "myutil.h"
 
 template <class T>
 void calc_problem(int problem_type,
@@ -69,21 +66,18 @@ void finaltest()
   calc_problem<T>(113, 0, 0, 0, 0);
 }
 
-#define CHECK_TYPE(x)                                       \
-  else if(std::strcmp(implementation, #x) == 0) {           \
-    calc_problem<x ## SuffixArray>(problem_type,            \
-                                   alphabet_size,           \
-                                   reference_string_len,    \
-                                   n_query_strings,         \
-                                   max_query_string_len);   \
-  }
+#define CALC_PROBLEM(x) (calc_problem<BOOST_PP_CAT(x,SuffixArray)>( \
+    problem_type,                                                   \
+    alphabet_size,                                                  \
+    reference_string_len,                                           \
+    n_query_strings,                                                \
+    max_query_string_len))
 
 int main(int argc, char ** argv) {
   using namespace liquid;
   if(argc <= 1)
   {
-    std::cerr << "Specify the implementation\n";
-    return 1;
+    FAIL_PRINT("Specify impl.");
   }
   const char * implementation    = argv[1];
   const int problem_type         = (argc > 2 ? atoi(argv[2]) : 0);
@@ -92,11 +86,6 @@ int main(int argc, char ** argv) {
   const int n_query_strings      = (argc > 5 ? atoi(argv[5]) : 0);
   const int max_query_string_len = (argc > 6 ? atoi(argv[6]) : 0);
   /* all defaults */
-  if(false) { }
-  CHECK_TYPE(Naive)
-  CHECK_TYPE(LS)
-  CHECK_TYPE(IS)
-  CHECK_TYPE(ISorg)
-  else{ std::cerr << "Incorrect implementation type\n"; return 1; }
+  LIST_TYPE(CALC_PROBLEM)
   return 0;
 }

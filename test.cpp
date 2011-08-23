@@ -1,30 +1,7 @@
-#include <time.h>
-#include <random>
+#include <cstdio>
 #include <iostream>
-#include <algorithm>
-#include <functional>
 #include <boost/timer.hpp>
-#include "mysearch_naive.h"
-#include "mysearch_is.h"
-#include "mysearch_ls.h"
-
-//#define FIND_BUG_MODE
-constexpr double FIND_BUG_MODE_SIZE = 8;
-
-class MyTimer
-{
-  double t1;
-public:
-  static double getCurrClocktime() {
-    timespec tp;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &tp);
-    return tp.tv_sec + static_cast<double>(tp.tv_nsec) / 1000 / 1000 / 1000;
-  }
-  MyTimer() : t1(getCurrClocktime()) {}
-  double elapsed() {
-    return getCurrClocktime() - t1;
-  }
-};
+#include "myutil.h"
 
 template <class T>
 void test(const char * str)
@@ -33,49 +10,6 @@ void test(const char * str)
   boost::timer t;
   T SA(str, std::strlen(str) + 1);
   printf("#elapsed time: %lf\n", t.elapsed());
-}
-
-template <class T>
-void randomtest()
-{
-  std::string buf;
-  const size_t MAX_SIZE = 10000000;
-
-  std::random_device rnddev;
-  std::vector< std::uint_least32_t> v(10);
-  std::generate(v.begin(), v.end(), std::ref(rnddev));
-  std::seed_seq seed(v.begin(), v.end());
-
-  std::mt19937 engine(seed);
-  std::uniform_int_distribution<int> distribution('a', 'z');
-  std::function<int()> rnd = [&]{ return distribution(engine); };
-
-  typedef std::vector<std::pair<size_t, double> > result_t;
-  typedef result_t::iterator result_itrator;
-  result_t result;
-
-  for(size_t size=2; size < MAX_SIZE; size*=2)
-  {
-#ifdef FIND_BUG_MODE
-    size = FIND_BUG_MODE_SIZE;
-#endif
-    buf.resize(size);
-    for(size_t i=0; i < size; ++i)
-    {
-      if(false && i&1) buf[i] = 'a';
-      else buf[i] = rnd();
-    }
-    MyTimer t;
-#ifdef FIND_BUG_MODE
-    std::cerr << buf << "\n";
-#endif
-    T SA(buf.c_str(), size + 1);
-    result.push_back(std::make_pair(size, t.elapsed()));
-  }
-  for(result_itrator it = result.begin(); it != result.end(); ++it)
-  {
-    printf("%zd %lf\n", it->first, it->second);
-  }
 }
 
 template <class T>
@@ -102,22 +36,17 @@ void findbug()
   }
 }
 
-int main()
+const char * probs[] = {
+  "yakafaqafaqafana",
+  "mississippi",
+  "ababababcabcdabcdeabcdefabababacab",
+};
+
+#define SIMPLE_TEST(r,data,impl) std::cout << "#" BOOST_PP_STRINGIZE(impl) "\n"; for(size_t i=0; i < LENGTH(data); ++i) { test<BOOST_PP_CAT(impl,SuffixArray)>(data[i]); }
+
+int main(int argc, char ** argv)
 {
   using namespace liquid;
-  std::cout << "Naive\n";
-  test<NaiveSuffixArray>("yakafaqafaqafana");
-  test<NaiveSuffixArray>("mississippi");
-  test<NaiveSuffixArray>("ababababcabcdabcdeabcdefabababacab");
-  std::cout << "Larsson Sadakane\n";
-  test<LSSuffixArray>("yakafaqafaqafana");
-  test<LSSuffixArray>("mississippi");
-  test<LSSuffixArray>("ababababcabcdabcdeabcdefabababacab");
-  std::cout << "Induced\n";
-  test<ISSuffixArray>("yakafaqafaqafana");
-  test<ISSuffixArray>("mississippi");
-  test<ISSuffixArray>("ababababcabcdabcdeabcdefabababacab");
-  //findbug<ISSuffixArray>();
-  printf("#random test\n");
-  randomtest<NaiveSuffixArray>();
+  BOOST_PP_SEQ_FOR_EACH(SIMPLE_TEST,probs,IMPL_SEQ)
+  // findbug<ISSuffixArray>();
 }
