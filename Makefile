@@ -18,13 +18,22 @@ O0: $(TGT_O0) $(TGT_SYS)
 
 all: O0 O2 O3
 
-%.O0: %.cpp $(MYS_HEADERS) gen_prob.h libgen_prob.a
+%.O0: %.cpp $(MYS_HEADERS) gen_prob.h
 	$(CXX) $(CXXFLAGS) -O0 $< libgen_prob.a -o $@
 
-%.O2: %.cpp $(MYS_HEADERS) gen_prob.h libgen_prob.a
+%.O2: %.cpp $(MYS_HEADERS) gen_prob.h
 	$(CXX) $(CXXFLAGS) -O2 $< libgen_prob.a -o $@
 
-%.O3: %.cpp $(MYS_HEADERS) gen_prob.h libgen_prob.a
+%.O3: %.cpp $(MYS_HEADERS) gen_prob.h
+	$(CXX) $(CXXFLAGS) -O3 $< libgen_prob.a -o $@
+
+mysearch.O0: mysearch.cpp $(MYS_HEADERS) gen_prob.h libgen_prob.a
+	$(CXX) $(CXXFLAGS) -O0 $< libgen_prob.a -o $@
+
+mysearch.O2: mysearch.cpp $(MYS_HEADERS) gen_prob.h libgen_prob.a
+	$(CXX) $(CXXFLAGS) -O2 $< libgen_prob.a -o $@
+
+mysearch.O3: mysearch.cpp $(MYS_HEADERS) gen_prob.h libgen_prob.a
 	$(CXX) $(CXXFLAGS) -O3 $< libgen_prob.a -o $@
 
 %.O0: %.c $(MYS_HEADERS) gen_prob.h libgen_prob.a

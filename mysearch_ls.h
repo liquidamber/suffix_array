@@ -27,7 +27,7 @@ namespace
 
 namespace liquid
 {
-  class LSSuffixArray : public BaseSuffixArray
+  class LSSuffixArray : public PortableBaseSuffixArray
   {
     typedef signed_length_t rank_t;
     std::vector<signed_length_t> rank;
@@ -256,7 +256,7 @@ namespace liquid
   public:
     const static size_t SORT_SIZE_LIMIT = 10;
     LSSuffixArray(const char * ref_str, const size_t ref_length)
-      : BaseSuffixArray(ref_str, ref_length), rank(ref_length) {
+      : PortableBaseSuffixArray(ref_str, ref_length), rank(ref_length) {
       init_index_and_rank();
       dprint_index_and_rank();
       size_t n = 2;

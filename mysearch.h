@@ -16,6 +16,7 @@ extern "C"{
 
 namespace liquid
 {
+  template <class T>
   class BaseSuffixArray
   {
   public:
@@ -44,19 +45,18 @@ namespace liquid
   protected:
     const char * ref_str;
     const size_t ref_length;
-    std::vector<signed_length_t> index;
+    std::vector<T> index;
   public:
     BaseSuffixArray(const char * ref_str, const size_t ref_length)
       : ref_str(ref_str), ref_length(ref_length), index(ref_length) {
     }
     virtual ~BaseSuffixArray() {}
     virtual answer findall_or_max(const char * query, const size_t max_hits) {
-      typedef std::vector<signed_length_t>::iterator itr_t;
       const size_t l = std::strlen(query);
-      itr_t lb = std::lower_bound(index.begin(),
-                                  index.end()  , query, LessStrLimited(ref_str, l));
-      itr_t ub = std::upper_bound(lb,
-                                  index.end()  , query, LessStrLimited(ref_str, l));
+      auto lb = std::lower_bound(index.begin(),
+                                 index.end()  , query, LessStrLimited(ref_str, l));
+      auto ub = std::upper_bound(lb,
+                                 index.end()  , query, LessStrLimited(ref_str, l));
       if ( !(lb < ub) )
       {
         return {0, nullptr};
@@ -67,14 +67,15 @@ namespace liquid
       {
         pos = new int[ans_size];
         size_t i;
-        itr_t it;
-        for(it = lb, i = 0; it != ub; ++it, ++i)
+        for(auto it = lb, i = 0; it != ub; ++it, ++i)
         {
           pos[i] = *it;
         }
         std::sort(pos, pos + ans_size);
       }
-      return { ub - lb, pos };
+      return { static_cast<int>(ub - lb), pos };
     }
   };
+
+  typedef BaseSuffixArray<BaseSuffixArray<int>::signed_length_t> PortableBaseSuffixArray;
 }

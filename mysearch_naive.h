@@ -6,11 +6,11 @@
 
 namespace liquid
 {
-  class NaiveSuffixArray : public BaseSuffixArray
+  class NaiveSuffixArray : public PortableBaseSuffixArray
   {
   public:
     NaiveSuffixArray(const char * ref_str, const size_t ref_length)
-      : BaseSuffixArray(ref_str, ref_length) {
+      : PortableBaseSuffixArray(ref_str, ref_length) {
       for(size_t i=0; i < ref_length; ++i)
       {
         $.index[i] = i;

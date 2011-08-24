@@ -75,8 +75,8 @@ namespace liquid
 {
   namespace SAIS
   {
-    typedef BaseSuffixArray::signed_length_t signed_length_t;
-    typedef BaseSuffixArray::unsigned_length_t unsigned_length_t;
+    typedef PortableBaseSuffixArray::signed_length_t signed_length_t;
+    typedef PortableBaseSuffixArray::unsigned_length_t unsigned_length_t;
     typedef std::vector<unsigned_length_t> bucket_t;
     // typedef SimpleArray<unsigned_length_t> bucket_t;
 
@@ -324,11 +324,11 @@ namespace liquid
     }
   }
 
-  class ISSuffixArray : public BaseSuffixArray
+  class ISSuffixArray : public PortableBaseSuffixArray
   {
   public:
     ISSuffixArray(const char * ref_str, const size_t ref_length)
-      : BaseSuffixArray(ref_str, ref_length) {
+      : PortableBaseSuffixArray(ref_str, ref_length) {
       const size_t K = UCHAR_MAX + 1;
       SAIS::SA_IS(ref_str, ref_str + ref_length, index, K);
 #ifdef DEBUG

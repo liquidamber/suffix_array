@@ -118,11 +118,11 @@ namespace liquid
 #undef isLMS
   }
 
-  class ISorgSuffixArray : public BaseSuffixArray
+  class ISorgSuffixArray : public BaseSuffixArray<int>
   {
   public:
     ISorgSuffixArray(const char * ref_str, const size_t ref_length)
-      : BaseSuffixArray(ref_str, ref_length) {
+      : BaseSuffixArray<int>(ref_str, ref_length) {
       const size_t K = UCHAR_MAX + 1;
       SAISorg::SA_IS(ucast(ref_str), &index[0], ref_length, K, sizeof(char));
 #ifdef DEBUG
