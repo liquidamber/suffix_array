@@ -66,8 +66,8 @@ namespace liquid
       if( ans_size <= max_hits )
       {
         pos = new int[ans_size];
-        size_t i;
-        for(auto it = lb, i = 0; it != ub; ++it, ++i)
+        size_t i = 0;
+        for(auto it = lb; it != ub; ++it, ++i)
         {
           pos[i] = *it;
         }
