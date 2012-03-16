@@ -248,7 +248,7 @@ namespace liquid
         }
         if(diff) { ++name; }
         prev = pos; visited = true;
-        pos = (pos - pos % 2) / 2;
+        pos = pos / 2;
         SA[n1+pos] = name - 1;
       }
       for(size_t i = n - 1, j = n; i >= n1; --i)
