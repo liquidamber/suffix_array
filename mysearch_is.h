@@ -59,15 +59,17 @@ namespace
         throw std::bad_alloc();
       }
     }
-    ~SimpleArray() {
-      std::free(buffer);
-    }
-    T & operator[](size_t i) {
-      return buffer[i];
-    }
+    ~SimpleArray() { std::free(buffer); }
+
+    T & operator[](size_t i) { return buffer[i]; }
+    const T & operator[](size_t i) const { return buffer[i]; }
+
     T * begin() { return buffer; }
     T * end() { return buffer + nmemb; }
-    size_t size() { return nmemb; }
+    const T * begin() const { return buffer; }
+    const T * end() const { return buffer + nmemb; }
+
+    size_t size() const { return nmemb; }
   };
 }
 
