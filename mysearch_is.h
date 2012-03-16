@@ -194,9 +194,7 @@ namespace liquid
       }
       std::cerr << std::endl;
 #endif
-
-      using namespace std::placeholders;
-      std::function<bool (size_t)> isLMS = std::bind(&isLMSindex, type, _1);
+      auto isLMS = [&type] (size_t x) { return isLMSindex(type, x); };
 #ifdef DEBUG
       std::cerr << "debug: ==begin stage 1." << std::endl;
 #endif
