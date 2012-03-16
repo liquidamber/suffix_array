@@ -8,17 +8,17 @@
 using namespace liquid;
 
 template <class T>
-void createTimeList(const std::vector<char> & buf)
+void createTimeList(const std::vector<char> & buf, size_t length)
 {
   MyTimer mytimer;
-  T SAIS(&buf[0], buf.size());
+  T SAIS(&buf[0], length);
   std::cout << mytimer.elapsed() << "\n";
 }
 
-#define CREATE_TIME_TEST(r, data, impl)         \
-  do {                                          \
-    std::cout << BOOST_PP_STRINGIZE(impl);      \
-    createTimeList<BOOST_PP_CAT(impl, SuffixArray)>(buf);    \
+#define CREATE_TIME_TEST(r, data, impl)                             \
+  do {                                                              \
+    std::cout << BOOST_PP_STRINGIZE(impl);                          \
+    createTimeList<BOOST_PP_CAT(impl, SuffixArray)>(buf, length);   \
   } while(0);
 
 #define CREATE_TIME_TEST_ALL BOOST_PP_SEQ_FOR_EACH(CREATE_TIME_TEST, 0, IMPL_SEQ)
@@ -43,6 +43,7 @@ int main(int argc, char ** argv)
   std::vector<char> buf(len);
   ifs.read(&buf[0], len);
   buf.push_back('\0');
+  const size_t length = std::strlen(&buf[0]);
   CREATE_TIME_TEST_ALL;
   return 0;
 }
